@@ -1,8 +1,8 @@
- #Api URL:s 
+#Api URL:s 
 
 urls:
 - https://api.igdb.com/v4/game
--  https://api.igdb.com/v4/game_modes
+- https://api.igdb.com/v4/game_modes
 - https://api.igdb.com/v4/game_types
 - https://api.igdb.com/v4/genres
 - https://api.igdb.com/v4/involved_companies
@@ -11,3 +11,13 @@ urls:
 - https://api.igdb.com/v4/platforms
 - https://api.igdb.com/v4/themes
 - https://api.igdb.com/v4/player_perspectives
+
+fields:
+- [checksum, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
+- [checksum, name]
+- [checksum, name]
+- [checksum, name]
+- [checksum, company, developer, porting, publisher, supporting]
+- [checksum, name]
+- [checksum, campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline]
+- 

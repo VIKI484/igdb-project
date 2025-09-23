@@ -1,7 +1,8 @@
-#Api URL:s 
+# API URL:s and fields for IGDB (Internet Game Database)
+
 
 urls:
-- https://api.igdb.com/v4/game
+- https://api.igdb.com/v4/games
 - https://api.igdb.com/v4/game_modes
 - https://api.igdb.com/v4/game_types
 - https://api.igdb.com/v4/genres
@@ -9,8 +10,8 @@ urls:
 - https://api.igdb.com/v4/keywords
 - https://api.igdb.com/v4/multiplayer_modes
 - https://api.igdb.com/v4/platforms
-- https://api.igdb.com/v4/themes
 - https://api.igdb.com/v4/player_perspectives
+- https://api.igdb.com/v4/themes
 
 fields:
 - [checksum, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
@@ -20,4 +21,6 @@ fields:
 - [checksum, company, developer, porting, publisher, supporting]
 - [checksum, name]
 - [checksum, campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline]
-- 
+- [checksum, name]
+- [checksum, name]
+- [checksum, name]

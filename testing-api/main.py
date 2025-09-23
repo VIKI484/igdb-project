@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 import requests
 import json
+import Yaml
 
 
 class APIData:
@@ -124,4 +125,5 @@ if __name__ == "__main__":
         logging.info("Exited program with exit_code: 0")
     else:
         logging.info(f"Exited program with exit_code: {exit_code}")
-
+      
+      

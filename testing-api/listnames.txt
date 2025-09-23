@@ -1,13 +1,13 @@
  Api URL:s 
 
 
-Game URL  :   https://api.igdb.com/v4/game
-Game mode : https://api.igdb.com/v4/game_modes
-Game Type : https://api.igdb.com/v4/game_types
-Genre     : https://api.igdb.com/v4/genres
-Involved company : https://api.igdb.com/v4/involved_companies
-Keyword   : https://api.igdb.com/v4/keywords
-Multiplayer Mode : https://api.igdb.com/v4/multiplayer_modes
-Platform  : https://api.igdb.com/v4/platforms
-Theme     : https://api.igdb.com/v4/themes
-Player Perspective : https://api.igdb.com/v4/player_perspectives
+POST  | https://api.igdb.com/v4/game
+POST  | https://api.igdb.com/v4/game_modes
+POST  | https://api.igdb.com/v4/game_types
+POST  | https://api.igdb.com/v4/genres
+POST  | https://api.igdb.com/v4/involved_companies
+POST  | https://api.igdb.com/v4/keywords
+POST  | https://api.igdb.com/v4/multiplayer_modes
+POST  | https://api.igdb.com/v4/platforms
+POST  | https://api.igdb.com/v4/themes
+POST  | https://api.igdb.com/v4/player_perspectives

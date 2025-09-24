@@ -14,13 +14,13 @@ urls:
 - https://api.igdb.com/v4/themes
 
 fields:
-- [checksum, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
-- [checksum, name]
-- [checksum, name]
-- [checksum, name]
-- [checksum, company, developer, porting, publisher, supporting]
-- [checksum, name]
-- [checksum, campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline]
-- [checksum, name]
-- [checksum, name]
-- [checksum, name]
+- [first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
+- [name]
+- [name]
+- [name]
+- [company, developer, porting, publisher, supporting]
+- [name]
+- [campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline]
+- [name]
+- [name]
+- [name]

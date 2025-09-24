@@ -1,11 +1,10 @@
-
 import os
 import logging
 from dotenv import load_dotenv
 
 import requests
 import json
-import Yaml
+import yaml
 
 
 class APIData:
@@ -103,21 +102,26 @@ def main() -> int:
     client_id = os.getenv("CLIENT_ID")
     client_secret = os.getenv("CLIENT_SECRET")
 
+    with open("listnames.yml", "r") as f:
+        config = yaml.safe_load(f)
+    urls = config.get("urls", [])
+    fields = config.get("fields", [])
+
     my_data = APIData()
     auth = my_data.authenticate(client_id, client_secret)
     if auth:
         logger.info("Authentication successful")
 
-        # Fetch data from the IGDB API. 
-        # Change url, data_fields, and data_limit as needed.
-        my_data.api_fetch("https://api.igdb.com/v4/games", 
-                          client_id, auth["access_token"], 
-                          ["name", "rating", "release_dates"], 5)
-        if my_data.data:
-            logger.info("Data fetch successful")
-            print(my_data)
+        # Fetch data from the IGDB API.
+        # Loopa över URL:erna och fälten i config-filen.
+        for url, field in zip(urls, fields):
+            my_data.api_fetch(url, client_id, auth["access_token"], field, 5)
+            if my_data.data:
+                logger.info(f"Data fetch successful from {url}")
+                print(my_data)
 
     return 0
+
 
 if __name__ == "__main__":
     exit_code = main()
@@ -125,5 +129,3 @@ if __name__ == "__main__":
         logging.info("Exited program with exit_code: 0")
     else:
         logging.info(f"Exited program with exit_code: {exit_code}")
-      
-      

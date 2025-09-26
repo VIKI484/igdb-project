@@ -16,7 +16,7 @@ urls:
 fields:
 - [first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
 - [name]
-- [name]
+- [type]
 - [name]
 - [company, developer, porting, publisher, supporting]
 - [name]

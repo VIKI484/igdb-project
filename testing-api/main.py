@@ -1,10 +1,11 @@
 import os
 import logging
 from dotenv import load_dotenv
+import yaml
 
 import requests
 import json
-import yaml
+from google.cloud import bigquery
 
 
 class APIData:
@@ -19,6 +20,10 @@ class APIData:
             data (dict): A dictionary to store fetched data from the IGDB API.
         """
         self.TOKEN_URL = "https://id.twitch.tv/oauth2/token"
+        self.client = bigquery.Client()
+        self.project_id = os.getenv("GCP_PROJECT_ID")
+        self.dataset_id = os.getenv("BQ_DATASET_ID")
+        self.table_id = os.getenv("BQ_TABLE_ID")
         self.api_url = ""
         self.data = {}
     def __repr__(self):
@@ -88,6 +93,24 @@ class APIData:
             self.data = response.json()
         except Exception as e:
             logging.error(f"An error occurd when trying to fetch data: {e}")
+    
+    def upload_to_bigquery(self) -> None:
+        """
+        Uploads the fetched data to a specified BigQuery table.
+        """
+        try:
+            client = bigquery.Client()
+            table_ref = client.dataset(dataset_id).table(table_id)
+            table = client.get_table(table_ref)
+
+            errors = client.insert_rows_json(table, self.data)
+            if errors:
+                logging.error(f"Errors occurred while inserting rows: {errors}")
+            else:
+                logging.info(f"Successfully inserted {len(self.data)} rows into "
+                             f"{dataset_id}.{table_id}")
+        except Exception as e:
+            logging.error(f"An error occurred while uploading to BigQuery: {e}")
 
 
 def main() -> int:

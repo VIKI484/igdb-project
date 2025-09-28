@@ -12,8 +12,5 @@ COPY main.py .
 COPY service-account-key.json .
 COPY listnames.yml .
 
-# Set environment variables
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
-
 # Run the application
 CMD ["python", "main.py"]

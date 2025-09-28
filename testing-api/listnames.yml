@@ -2,6 +2,7 @@
 
 
 urls:
+- https://api.igdb.com/v4/companies
 - https://api.igdb.com/v4/games
 - https://api.igdb.com/v4/game_modes
 - https://api.igdb.com/v4/game_types
@@ -14,6 +15,7 @@ urls:
 - https://api.igdb.com/v4/themes
 
 fields:
+- [name]
 - [first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
 - [name]
 - [type]
@@ -24,3 +26,16 @@ fields:
 - [name]
 - [name]
 - [name]
+
+limits:
+- null
+- 5
+- null
+- null
+- null
+- null
+- null
+- null
+- null
+- null
+- null

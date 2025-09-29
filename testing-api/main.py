@@ -1,10 +1,13 @@
 import os
 import logging
 from dotenv import load_dotenv
+import yaml
 
 import requests
 import json
-import yaml
+from google.cloud import bigquery
+import pandas as pd
+
 
 
 class APIData:
@@ -19,6 +22,7 @@ class APIData:
             data (dict): A dictionary to store fetched data from the IGDB API.
         """
         self.TOKEN_URL = "https://id.twitch.tv/oauth2/token"
+        self.client = bigquery.Client()
         self.api_url = ""
         self.data = {}
     def __repr__(self):
@@ -73,9 +77,10 @@ class APIData:
         """
         try:
             # Construct the data query
-            data_query = f"fields {",".join(data_fields)};" if data_fields \
+            data_query = f"fields {','.join(data_fields)};" if data_fields \
                 else "fields id;"
-            data_query += f" limit {data_limit};" if data_limit else " limit 10;"
+            if data_limit:
+                data_query += f" limit {data_limit};"
             
             # Make the API request
             response = requests.post(
@@ -88,6 +93,37 @@ class APIData:
             self.data = response.json()
         except Exception as e:
             logging.error(f"An error occurd when trying to fetch data: {e}")
+    
+    def upload_to_bigquery(self, dataset_id: str, table_id: str) -> None:
+        """
+        Uploads the fetched data to a specified BigQuery table.
+        """
+        table_ref = self.client.dataset(dataset_id).table(table_id)
+        try:
+            # Convert to DataFrame
+            df = pd.DataFrame(self.data)
+            logging.info(f"Prepared {len(df)} records for upload")
+            
+            # Configure load job
+            job_config = bigquery.LoadJobConfig(
+                write_disposition="WRITE_APPEND",
+                autodetect=False,  # Use predefined schema
+            )
+            
+            # Upload data
+            logging.info("Starting BigQuery upload...")
+            job = self.client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+            
+            # Wait for completion
+            job.result()
+            
+            # Get updated table info
+            table = self.client.get_table(table_ref)
+            logging.info(f"Upload complete! Table now has {table.num_rows} total rows")
+            
+        except Exception as e:
+            logging.error(f"Error uploading to BigQuery: {e}")
+            raise
 
 
 def main() -> int:
@@ -106,6 +142,10 @@ def main() -> int:
         config = yaml.safe_load(f)
     urls = config.get("urls", [])
     fields = config.get("fields", [])
+    limits = config.get("limits", [])
+
+    dataset_id = os.getenv("BQ_DATASET_ID")
+    table_ids = os.getenv("BQ_TABLE_IDS", "").split(",")
 
     my_data = APIData()
     auth = my_data.authenticate(client_id, client_secret)
@@ -114,11 +154,11 @@ def main() -> int:
 
         # Fetch data from the IGDB API.
         # Loopa över URL:erna och fälten i config-filen.
-        for url, field in zip(urls, fields):
-            my_data.api_fetch(url, client_id, auth["access_token"], field, 5)
+        for url, field, limit, table_id in zip(urls, fields, limits, table_ids):
+            my_data.api_fetch(url, client_id, auth["access_token"], field, limit)
             if my_data.data:
                 logger.info(f"Data fetch successful from {url}")
-                print(my_data)
+                my_data.upload_to_bigquery(dataset_id, table_id)
 
     return 0
 

@@ -1,0 +1,12 @@
+services:
+  testing-api:
+    build: .
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - BQ_DATASET_ID=${BQ_DATASET_ID}
+      - BQ_TABLE_ID=${BQ_TABLE_ID}
+    volumes:
+      - ./service-account-key.json:/app/service-account-key.json:ro

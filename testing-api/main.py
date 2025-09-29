@@ -6,7 +6,6 @@ import yaml
 import requests
 import json
 from google.cloud import bigquery
-from google.cloud.exceptions import NotFound
 import pandas as pd
 
 

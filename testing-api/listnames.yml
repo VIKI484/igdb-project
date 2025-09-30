@@ -1,6 +1,4 @@
-# API URL:s and fields for IGDB (Internet Game Database)
-
-
+# API URL:s
 urls:
 - https://api.igdb.com/v4/companies
 - https://api.igdb.com/v4/games
@@ -14,28 +12,16 @@ urls:
 - https://api.igdb.com/v4/player_perspectives
 - https://api.igdb.com/v4/themes
 
-fields:
-- [name]
-- [first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count]
-- [name]
-- [type]
-- [name]
-- [company, developer, porting, publisher, supporting]
-- [name]
-- [campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline]
-- [name]
-- [name]
-- [name]
-
-limits:
-- null
-- 5
-- null
-- null
-- null
-- null
-- null
-- null
-- null
-- null
-- null
+# Queries for each URL
+queries:
+- fields name; where name != null; sort name asc; limit 999999;
+- fields name, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count; where first_release_date > 1443477600 & hypes != null & total_rating != null & total_rating_count != null; sort first_release_date desc; limit 500;
+- fields name; where name != null; sort name asc; limit 999999;
+- fields type; where type != null; sort type asc; limit 999999;
+- fields name; where name != null; sort name asc; limit 999999;
+- fields company, developer, porting, publisher, supporting; where id != null; sort id asc; limit 999999;
+- fields name; where name != null; sort name asc; limit 999999;
+- fields campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline; where id != null; sort id asc; limit 999999;
+- fields name; where name != null; sort name asc; limit 999999;
+- fields name; where name != null; sort name asc; limit 999999;
+- fields name; where name != null; sort name asc; limit 999999;

@@ -59,8 +59,7 @@ class APIData:
             logging.error(f"An error occurd when trying to authenticate: {e}")
             return None
     def api_fetch(self, url: str, client_id: str, access_token: str, 
-                  data_fields: list[str] | None = None, 
-                  data_limit: int | None = None) -> None:
+                  query: str) -> None:
         """
         Fetches data from the IGDB API using the provided URL,
         client ID, access token, and optional data fields and limit.  
@@ -76,23 +75,47 @@ class APIData:
             data_limit (int | None): Optional limit on the number of records to fetch.
         """
         try:
-            # Construct the data query
-            data_query = f"fields {','.join(data_fields)};" if data_fields \
-                else "fields id;"
-            if data_limit:
-                data_query += f" limit {data_limit};"
-            
             # Make the API request
             response = requests.post(
                 url=url, 
                 **{"headers": {"Client-ID": client_id, 
                                "Authorization": f"Bearer {access_token}"}, 
-                               "data": data_query})
+                               "data": query})
             
             self.api_url = url
             self.data = response.json()
         except Exception as e:
             logging.error(f"An error occurd when trying to fetch data: {e}")
+
+    def save_to_json(self, file_path: str) -> None:
+        """
+        Saves the fetched data to a JSON file.
+
+        Args:
+            file_path (str): The path to the file where data should be saved.
+        """
+        try:
+            with open(file_path, "w") as f:
+                json.dump(self.data, f, indent=4)
+            logging.info(f"Data successfully saved to {file_path}! Added {len(self.data)} records.")
+        except Exception as e:
+            logging.error(f"Error saving data to JSON: {e}")
+            raise
+
+    def load_from_json(self, file_path: str) -> None:
+        """
+        Loads data from a JSON file into the instance variable `data`.
+
+        Args:
+            file_path (str): The path to the JSON file to load data from.
+        """
+        try:
+            with open(file_path, "r") as f:
+                self.data = json.load(f)
+            logging.info(f"Data successfully loaded from {file_path}")
+        except Exception as e:
+            logging.error(f"Error loading data from JSON: {e}")
+            raise
     
     def upload_to_bigquery(self, dataset_id: str, table_id: str) -> None:
         """
@@ -106,7 +129,7 @@ class APIData:
             
             # Configure load job
             job_config = bigquery.LoadJobConfig(
-                write_disposition="WRITE_APPEND",
+                write_disposition="WRITE_TRUNCATE_DATA",
                 autodetect=False,  # Use predefined schema
             )
             
@@ -141,10 +164,9 @@ def main() -> int:
     with open("listnames.yml", "r") as f:
         config = yaml.safe_load(f)
     urls = config.get("urls", [])
-    fields = config.get("fields", [])
-    limits = config.get("limits", [])
+    queries = config.get("queries", [])
 
-    dataset_id = os.getenv("BQ_DATASET_ID")
+    #dataset_id = os.getenv("BQ_DATASET_ID")
     table_ids = os.getenv("BQ_TABLE_IDS", "").split(",")
 
     my_data = APIData()
@@ -154,11 +176,11 @@ def main() -> int:
 
         # Fetch data from the IGDB API.
         # Loopa över URL:erna och fälten i config-filen.
-        for url, field, limit, table_id in zip(urls, fields, limits, table_ids):
-            my_data.api_fetch(url, client_id, auth["access_token"], field, limit)
+        for url, query, table_id in zip(urls, queries, table_ids):
+            my_data.api_fetch(url, client_id, auth["access_token"], query)
             if my_data.data:
                 logger.info(f"Data fetch successful from {url}")
-                my_data.upload_to_bigquery(dataset_id, table_id)
+                my_data.save_to_json(f"raw_data/{table_id}.json")
 
     return 0
 

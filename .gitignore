@@ -2,3 +2,4 @@ venv
 .env
 __pycache__/
 service-account-key.json
+raw_data/

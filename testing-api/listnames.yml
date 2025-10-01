@@ -14,14 +14,14 @@ urls:
 
 # Queries for each URL
 queries:
-- fields name; where name != null; sort name asc; limit 999999;
-- fields name, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count; where first_release_date > 1443477600 & hypes != null & total_rating != null & total_rating_count != null; sort first_release_date desc; limit 500;
-- fields name; where name != null; sort name asc; limit 999999;
-- fields type; where type != null; sort type asc; limit 999999;
-- fields name; where name != null; sort name asc; limit 999999;
-- fields company, developer, porting, publisher, supporting; where id != null; sort id asc; limit 999999;
-- fields name; where name != null; sort name asc; limit 999999;
-- fields campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline; where id != null; sort id asc; limit 999999;
-- fields name; where name != null; sort name asc; limit 999999;
-- fields name; where name != null; sort name asc; limit 999999;
-- fields name; where name != null; sort name asc; limit 999999;
+- fields name; sort id asc;
+- fields name, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count; where first_release_date > 1443477600 & hypes != null & total_rating != null & total_rating_count != null; sort first_release_date desc; limit 1000;
+- fields name; sort id asc;
+- fields type; sort id asc;
+- fields name; sort id asc;
+- fields company, developer, porting, publisher, supporting; sort id asc;
+- fields name; sort id asc;
+- fields campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline; sort id asc;
+- fields name; sort id asc;
+- fields name; sort id asc;
+- fields name; sort id asc;

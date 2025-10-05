@@ -258,6 +258,56 @@ def save_one_table_locally(pipeline: Pipeline, client_id: str, url: str, query: 
     if data:
         data.save_to_json(f"raw_data/{table_id}.json")
 
+def upload_local_to_bigquery(pipeline: Pipeline, table_ids: list[str] | None = None) -> None:
+    """
+    Uploads local JSON files to BigQuery.
+    If table_ids is not provided, it will be read from the environment variable.
+
+    Args:
+        pipeline (Pipeline): An instance of the Pipeline class.
+        table_ids (list[str] | None): Optional list of BigQuery table IDs.
+    """
+    if not table_ids:
+        table_ids = os.getenv("BQ_TABLE_IDS", "").split(",")
+    for table_id in table_ids:
+        data = Data()
+        data.load_from_json(f"raw_data/{table_id}.json")
+        if data and data.records > 0:
+            pipeline.upload_to_bigquery(data, dataset_id="raw_data", table_id=table_id)
+
+def upload_api_to_bigquery(pipeline: Pipeline, client_id: str, urls: list[str] | None = None, 
+                           querys: list[str] | None = None, table_ids: list[str] | None = None) -> None:
+    """
+    Uploads data fetched from the IGDB API directly to BigQuery.
+    If urls, querys, or table_ids are not provided, they will be read from
+    the listnames.yml file and environment variables.
+    
+    Args:
+        pipeline (Pipeline): An instance of the Pipeline class.
+        client_id (str): The client ID for IGDB API authentication.
+        urls (list[str] | None): Optional list of IGDB API endpoint URLs.
+        querys (list[str] | None): Optional list of queries for the IGDB API.
+        table_ids (list[str] | None): Optional list of BigQuery table IDs.
+    """
+    if not (urls and querys and table_ids):
+        with open("listnames.yml", "r") as f:
+            config = yaml.safe_load(f)
+        urls = config.get("urls", [])
+        queries = config.get("queries", [])
+
+        table_ids = os.getenv("BQ_TABLE_IDS", "").split(",")
+
+        for url, query, table_id in zip(urls, queries, table_ids):
+            data = Data(pipeline.api_fetch(url, client_id, pipeline.auth["access_token"], query))
+            if data and data.records > 0:
+                pipeline.upload_to_bigquery(data, dataset_id="raw_data", table_id=table_id)
+    else:
+        for url, query, table_id in zip(urls, querys, table_ids):
+            data = Data(pipeline.api_fetch(url, client_id, pipeline.auth["access_token"], query))
+            if data and data.records > 0:
+                pipeline.upload_to_bigquery(data, dataset_id="raw_data", table_id=table_id)
+
+
 def main() -> int:
     logging.basicConfig(
         level=logging.INFO, 
@@ -270,15 +320,8 @@ def main() -> int:
     client_secret = os.getenv("CLIENT_SECRET")
     pipeline = Pipeline()
     pipeline.authenticate(client_id, client_secret)
-    
-    save_everything_locally(pipeline=pipeline, client_id=client_id)
-    # save_one_table_locally(
-    #     pipeline=pipeline, 
-    #     client_id=client_id, 
-    #     url="https://api.igdb.com/v4/multiplayer_modes", 
-    #     query="- fields campaigncoop, dropin, lancoop, offlinecoop, offlinecoopmax, offlinemax, onlinecoop, onlinecoopmax, onlinemax, splitscreen, splitscreenonline; sort id asc;", 
-    #     table_id="multiplayer_modes"
-    # )
+
+    upload_api_to_bigquery(pipeline=pipeline, client_id=client_id)
 
     return 0
 

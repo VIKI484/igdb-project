@@ -117,12 +117,15 @@ class Pipeline:
             api_url (str): The URL for the IGDB API last fetched from.
             data (dict): A dictionary to store fetched data from the IGDB API.
         """
+        logging.info("Authenticating BigQuery client")
+        try:
+            self.client = bigquery.Client()
+            logging.info("Authentication successful")
+        except Exception as e:
+            logging.error(f"An error occurd when trying to authenticate: {e}")
+            raise
         self.TOKEN_URL = "https://id.twitch.tv/oauth2/token"
-        self.client = bigquery.Client()
         self.auth = None
-
-    def _get_client_secret(self) -> None:       # ADD LATER MAYBE
-        pass
     
     def authenticate(self, client_id: str, client_secret: str) -> None:
         """
@@ -137,6 +140,7 @@ class Pipeline:
         Returns:
             Authentication data if successful, otherwise returns None.
         """
+        logging.info("Authenticating IGDB API access")
         try:
             # Make the authentication request
             response = requests.post(
@@ -154,6 +158,8 @@ class Pipeline:
             self.auth = auth_data
         except Exception as e:
             logging.error(f"An error occurd when trying to authenticate: {e}")
+            raise
+
     def api_fetch(self, url: str, client_id: str, access_token: str, 
                   query: str) -> pd.DataFrame | None:
         """
@@ -177,6 +183,7 @@ class Pipeline:
         Returns:
             The fetched data if successful, otherwise returns None.
         """
+        logging.info("Fetching data")
         try:
             query_properties = {sub_seg[0].strip(): sub_seg[1].strip() for sub_seg in [seg.strip().split(maxsplit=1) for seg in query.lower().split(";")[:-1]]}
             ROW_INTERVAL = 500      # Max rows per request is 500
@@ -196,7 +203,6 @@ class Pipeline:
                     paged_query_properties["limit"] = str(ROW_INTERVAL)
                 paged_query_properties["offset"] = str(offset)
                 paged_query = " ".join([f"{key} {value};" for key, value in paged_query_properties.items()])
-                logging.info(f"Fetching data with query: {paged_query}")
                 response = requests.post(url=url, 
                                          headers={"Client-ID": client_id, 
                                                   "Authorization": f"Bearer {access_token}"}, 
@@ -210,6 +216,7 @@ class Pipeline:
             return all_data
         except Exception as e:
             logging.error(f"An error occurd when trying to fetch data: {e}")
+            raise
     
     def upload_to_bigquery(self, data: Data, dataset_id: str, table_id: str) -> None:
         """
@@ -239,19 +246,23 @@ class Pipeline:
 
 
 def save_everything_locally(pipeline: Pipeline, client_id: str) -> None:
-    with open("listnames.yml", "r") as f:
+    with open("value_config.yml", "r") as f:
         config = yaml.safe_load(f)
     urls = config.get("urls", [])
     queries = config.get("queries", [])
+    dataset_id = config.get("bq_dataset_id", "")
+    table_ids = config.get("bq_table_ids", [])
 
-    table_ids = os.getenv("BQ_TABLE_IDS", "").split(",")
+    # Create directory if directory does not exist.
+    if not os.path.exists(f"{dataset_id}/"):
+        os.mkdir(f"{dataset_id}")
 
     # Fetch data from the IGDB API.
-    # Loopa över URL:erna och fälten i config-filen.
+    # Loop over URLs, queries, and table IDs in value_config.yml.
     for url, query, table_id in zip(urls, queries, table_ids):
         data = Data(pipeline.api_fetch(url, client_id, pipeline.auth["access_token"], query))
         if data:
-            data.save_to_json(f"raw_data/{table_id}.json")
+            data.save_to_json(f"{dataset_id}/{table_id}.json")
 
 def save_one_table_locally(pipeline: Pipeline, client_id: str, url: str, query: str, table_id: str) -> None:
     data = Data(pipeline.api_fetch(url, client_id, pipeline.auth["access_token"], query))
@@ -276,10 +287,11 @@ def upload_local_to_bigquery(pipeline: Pipeline, table_ids: list[str] | None = N
             pipeline.upload_to_bigquery(data, dataset_id="raw_data", table_id=table_id)
 
 def upload_api_to_bigquery(pipeline: Pipeline, client_id: str, urls: list[str] | None = None, 
-                           querys: list[str] | None = None, table_ids: list[str] | None = None) -> None:
+                           querys: list[str] | None = None, dataset_id: str | None = None, 
+                           table_ids: list[str] | None = None) -> None:
     """
     Uploads data fetched from the IGDB API directly to BigQuery.
-    If urls, querys, or table_ids are not provided, they will be read from
+    If urls, querys, dataset_id, or table_ids are not provided, they will be read from
     the listnames.yml file and environment variables.
     
     Args:
@@ -287,25 +299,26 @@ def upload_api_to_bigquery(pipeline: Pipeline, client_id: str, urls: list[str] |
         client_id (str): The client ID for IGDB API authentication.
         urls (list[str] | None): Optional list of IGDB API endpoint URLs.
         querys (list[str] | None): Optional list of queries for the IGDB API.
+        dataset_id (str | None): Optional string of the BigQuery data set ID.
         table_ids (list[str] | None): Optional list of BigQuery table IDs.
     """
-    if not (urls and querys and table_ids):
-        with open("listnames.yml", "r") as f:
+    if not (urls and querys and dataset_id and table_ids):
+        with open("value_config.yml", "r") as f:
             config = yaml.safe_load(f)
         urls = config.get("urls", [])
         queries = config.get("queries", [])
-
-        table_ids = os.getenv("BQ_TABLE_IDS", "").split(",")
+        dataset_id = config.get("bq_dataset_id", "")    
+        table_ids = config.get("bq_table_ids", [])
 
         for url, query, table_id in zip(urls, queries, table_ids):
             data = Data(pipeline.api_fetch(url, client_id, pipeline.auth["access_token"], query))
             if data and data.records > 0:
-                pipeline.upload_to_bigquery(data, dataset_id="raw_data", table_id=table_id)
+                pipeline.upload_to_bigquery(data, dataset_id=dataset_id, table_id=table_id)
     else:
         for url, query, table_id in zip(urls, querys, table_ids):
             data = Data(pipeline.api_fetch(url, client_id, pipeline.auth["access_token"], query))
             if data and data.records > 0:
-                pipeline.upload_to_bigquery(data, dataset_id="raw_data", table_id=table_id)
+                pipeline.upload_to_bigquery(data, dataset_id=dataset_id, table_id=table_id)
 
 
 def main() -> int:
@@ -313,7 +326,7 @@ def main() -> int:
         level=logging.INFO, 
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s")
     logger = logging.getLogger(__name__)
-    logger.info("Hello from %s", __name__)
+    logger.info("Running API -> BigQuery pipeline")
     load_dotenv()
 
     client_id = os.getenv("CLIENT_ID")
@@ -321,14 +334,9 @@ def main() -> int:
     pipeline = Pipeline()
     pipeline.authenticate(client_id, client_secret)
 
+    #save_everything_locally(pipeline=pipeline, client_id=client_id)
     upload_api_to_bigquery(pipeline=pipeline, client_id=client_id)
-
-    return 0
 
 
 if __name__ == "__main__":
-    exit_code = main()
-    if exit_code == 0:
-        logging.info("Exited program with exit_code: 0")
-    else:
-        logging.info(f"Exited program with exit_code: {exit_code}")
+    main()

@@ -1,0 +1,14 @@
+# API URL:s
+urls:
+- https://api.igdb.com/v4/games
+- https://api.igdb.com/v4/genres
+
+# Queries for each URL
+queries:
+- fields name, first_release_date, game_modes, game_type, genres, involved_companies, keywords, multiplayer_modes, platforms, player_perspectives, themes, hypes, total_rating, total_rating_count; where first_release_date >= 1602021600 & total_rating != null; sort first_release_date desc; limit 5000;
+- fields name; sort id asc;
+
+bq_dataset_id: raw_data
+bq_table_ids:
+- games
+- genres

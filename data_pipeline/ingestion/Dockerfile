@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Apply Google application credentials
+# Apply Google Cloud credentials
 COPY service-account-key.json .
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
 

@@ -13,6 +13,7 @@ ENV GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
 
 # Copy remaining files
 COPY main.py .
+COPY value_config.yml .
 
 # Run script
 CMD [ "python", "main.py" ]

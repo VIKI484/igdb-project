@@ -1,0 +1,2 @@
+BQ_DATASET_ID: training_data
+BQ_VIEW_ID: test_view

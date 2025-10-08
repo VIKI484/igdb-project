@@ -2,3 +2,4 @@ google-cloud-bigquery==3.13.0
 matplotlib==3.10.6
 pandas==2.1.4
 python-dotenv==1.1.1
+PyYAML==6.0.2

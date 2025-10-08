@@ -10,7 +10,7 @@ urls:
 - https://api.igdb.com/v4/multiplayer_modes
 - https://api.igdb.com/v4/platforms
 - https://api.igdb.com/v4/player_perspectives
-- https://api.igdb.com/v4/themes
+- https://api.igdb.com/v4/themes 
 
 # Queries for each URL
 queries:

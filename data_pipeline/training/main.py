@@ -26,7 +26,6 @@ class MLModel:
             query = f"""
             SELECT *
             FROM `{self.dataset_id}.{self.view_id}`
-            SORT BY genre, release_year, release_month
             """
             query_job = self.client.query(query)
             results = query_job.result()
@@ -66,19 +65,27 @@ class MLModel:
             logging.error(f"Error during model training: {e}")
             raise
 
-    def predict(self) -> None:
+    def predict(self, genres: list[str], year: int | None = None) -> None:
         logging.info("Making prediction")
         try:
             if self.data.empty:
                 logging.warning("No data available in the model")
                 return
             fig, ax = plt.subplots()
-            for genre in self.data["genre"].unique():
+            for genre in genres:
                 df_filter = self.data["genre"] == genre
+                if year is not None:
+                    df_filter *= self.data["release_year"] == year
                 df = self.data[df_filter]
-                ax.plot([f"{year}/{month}" for year, month in df[["relese_year", "release_month"]]],
-                        df["rating"])
-            plt.show()
+                ax.plot([f"{year}/{month}" for year, month in zip(df["release_year"], df["release_month"])],
+                        df["rating"], label=genre)
+            ax.set_title(f"Average monthly rating of game genres in {year}")
+            ax.set_ylabel("Average rating (0-100)")
+            ax.set_xlabel("Year/month")
+            ax.tick_params("x", rotation=20)
+            ax.set_ylim(0, 100)
+            ax.legend()
+            fig.savefig("graph.png")
         except Exception as e:
             logging.error(f"Error during prediction: {e}")
             raise
@@ -96,8 +103,9 @@ def main():
 
     model = MLModel(dataset_id=dataset_id, view_id=view_id)
     model.fetch_data()
-    model.visualize_data(model.data)
+    model.visualize_data()
     model.train_model()
+    model.predict(["Adventure", "Indie", "Puzzle"], 2024)
 
 
 if __name__ == "__main__":

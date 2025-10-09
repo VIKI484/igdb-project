@@ -1,2 +1,2 @@
-BQ_DATASET_ID: training_data
-BQ_VIEW_ID: test_view
+dataset_id: training_data
+view_id: test_view2

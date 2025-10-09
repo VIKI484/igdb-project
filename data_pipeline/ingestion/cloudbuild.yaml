@@ -3,7 +3,7 @@ steps:
     args: [
       'build',
       '-t', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdb-repo/ingestion:${SHORT_SHA}',
-      '-f', 'Dockerfile',
+      '-f', 'data_pipeline/ingestion/Dockerfile',
       'data_pipeline/ingestion/',
     ]
 

@@ -3,8 +3,8 @@ steps:
     args: [
       'build',
       '-t', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdb-repo/ingestion:${SHORT_SHA}',
-      '-f', 'data_pipeline/ingestion/Dockerfile',
-      '.',
+      '-f', 'Dockerfile',
+      'data_pipeline/ingestion/',
     ]
 
   - name: 'gcr.io/cloud-builders/docker'

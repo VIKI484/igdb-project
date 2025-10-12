@@ -1,0 +1,32 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}',
+      '-f', 'dockerfile',
+      '.',
+    ]
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}',
+    ]
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: [
+      'run', 'deploy', 'api-pipeline',
+      '--image', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}',
+      '--region', 'europe-north2',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--port', '8080',
+      '--quiet',
+    ]
+
+images:
+  - 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

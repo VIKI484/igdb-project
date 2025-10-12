@@ -22,7 +22,8 @@ steps:
       '--platform', 'managed',
       '--allow-unauthenticated',
       '--port', '8080',
-      '--quiet',
+      '--quiet', 
+      '--timeout', '1600s',
     ]
 
 images:

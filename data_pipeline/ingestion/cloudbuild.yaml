@@ -2,22 +2,22 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build',
-      '-t', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}',
-      '-f', 'dockerfile',
-      '.',
+      '-t', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdb-repo/ingestion:${SHORT_SHA}',
+      '-f', 'data_pipeline/ingestion/Dockerfile',
+      'data_pipeline/ingestion/',
     ]
 
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push',
-      'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}',
+      'europe-north2-docker.pkg.dev/$PROJECT_ID/igdb-repo/ingestion:${SHORT_SHA}',
     ]
 
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args: [
-      'run', 'deploy', 'api-pipeline',
-      '--image', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}',
+      'run', 'deploy', 'ingestion',
+      '--image', 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdb-repo/ingestion:${SHORT_SHA}',
       '--region', 'europe-north2',
       '--platform', 'managed',
       '--allow-unauthenticated',
@@ -26,7 +26,7 @@ steps:
     ]
 
 images:
-  - 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdp-repo/api-pipeline:${SHORT_SHA}'
+  - 'europe-north2-docker.pkg.dev/$PROJECT_ID/igdb-repo/ingestion:${SHORT_SHA}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
